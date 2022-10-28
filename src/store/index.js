@@ -4,9 +4,19 @@ import Vuex from "vuex";
 Vue.use(Vuex);
 
 export default new Vuex.Store({
-  state: {},
-  getters: {},
-  mutations: {},
+  state: {
+    quotes_list: [],
+  },
+  getters: {
+    getQuotesList(state) {
+      return state.quotes_list;
+    },
+  },
+  mutations: {
+    setQuotesList(state, val) {
+      state.quotes_list = val;
+    },
+  },
   actions: {},
   modules: {},
 });
