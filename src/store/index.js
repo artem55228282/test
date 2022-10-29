@@ -16,7 +16,32 @@ export default new Vuex.Store({
     setQuotesList(state, val) {
       state.quotes_list = val;
     },
+    addQuote(state, val) {
+      state.quotes_list.push(val);
+    },
+    deleteQuote(state, val) {
+      state.quotes_list.forEach((el, idx) => {
+        if (el.id === val.id) {
+          state.quotes_list.splice(idx, 1);
+          return;
+        }
+      });
+    },
+    updateQuote(state, val) {
+      state.quotes_list.forEach((el, idx) => {
+        if (el.id === val.id) {
+          console.log(state.quotes_list[idx]);
+          state.quotes_list[idx] = val;
+          return;
+        }
+      });
+    },
   },
-  actions: {},
+  actions: {
+    addQuote(state, val) {
+      console.log("PUSHHHH Actions", val);
+      state.quotes_list.push(val);
+    },
+  },
   modules: {},
 });
