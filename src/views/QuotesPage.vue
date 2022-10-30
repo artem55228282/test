@@ -2,95 +2,135 @@
   <div class="wrapper">
     <div class="container">
       <div class="w-100 button-wrapper">
-        <b-button variant="outline-primary" class="mb-2" @click="addQuotes">
-          <b-icon icon="clipboard-plus" font-scale="1"></b-icon> Добавить цитату
-        </b-button>
-      </div>
-      <b-card
-        class="mt-2"
-        bg-variant="secondary"
-        v-for="(quote, idx) in quotes_list"
-        :key="idx"
-        text-variant="white"
-      >
+        <div class="inputs-wrapper">
+          <b-input-group class="input-filter">
+            <b-form-input
+              :v-bind="filter.author"
+              @change="
+                (e) => {
+                  filter.author = e;
+                  filteredQuotes();
+                }
+              "
+              placeholder="Автор"
+              type="text"
+            ></b-form-input>
+          </b-input-group>
+          <b-input-group class="input-filter">
+            <b-form-input
+              :v-bind="filter.text_content"
+              @change="
+                (e) => {
+                  filter.text_content = e;
+                  filteredQuotes();
+                }
+              "
+              placeholder="Текст"
+              type="text"
+            ></b-form-input>
+          </b-input-group>
+        </div>
         <div>
-          <div class="card-top">
-            <div class="card-top-left">
-              <span class="author"> {{ quote.author }} </span>
-              <span v-if="quote.genre" class="genre">
-                {{ "Жанр: " + quote.genre.toString() }}
+          <b-button variant="outline-primary" class="mb-2" @click="addQuotes">
+            <b-icon icon="clipboard-plus" font-scale="1"></b-icon>
+            Добавить цитату
+          </b-button>
+        </div>
+      </div>
+      <div v-if="quotes_list.length > 0">
+        <b-card
+          class="mt-2"
+          bg-variant="secondary"
+          v-for="(quote, idx) in quotes_list"
+          :key="idx"
+          text-variant="white"
+        >
+          <div>
+            <div class="card-top">
+              <div class="card-top-left">
+                <span class="author"> {{ quote.author }} </span>
+                <span v-if="quote.genre" class="genre">
+                  {{ "Жанр: " + quote.genre.toString() }}
+                </span>
+              </div>
+              <span class="created-date">
+                {{ dateFormatter(quote.created_date) }}
               </span>
             </div>
-            <span class="created-date">
-              {{ dateFormatter(quote.created_date) }}
-            </span>
-          </div>
-          <div class="card-middle">
-            <div class="row w-100">
-              <div class="col-10">
-                <span class="content">
-                  {{ quote.text_content }}
-                </span>
-              </div>
-              <div class="col-2">
-                <span class="button-group">
-                  <b-button
-                    v-b-tooltip.hover.bottom="'Просмотр'"
-                    class="bg-primary p-1 px-2 m-1"
-                    style="border-radius: 3px"
-                    @click="
-                      $router.push({
-                        name: 'QuotePage',
-                        params: { id: quote.id },
-                      })
-                    "
-                  >
-                    <b-icon
-                      icon="eye"
-                      color="white"
-                      size="30px"
-                      font-scale="1"
-                    ></b-icon>
-                  </b-button>
-                  <b-button
-                    v-b-tooltip.hover.bottom="'Редактировать'"
-                    class="bg-warning p-1 px-2 m-1"
-                    style="border-radius: 3px"
-                    @click="editQuotes(quote)"
-                  >
-                    <b-icon
-                      icon="pencil-square"
-                      color="white"
-                      size="30px"
-                      font-scale="1"
-                    ></b-icon>
-                  </b-button>
-                  <b-button
-                    v-b-tooltip.hover.bottom="'Удалить'"
-                    class="bg-danger p-1 px-2"
-                    style="border-radius: 3px"
-                    @click="openDeleteDialog(quote)"
-                  >
-                    <b-icon
-                      icon="basket"
-                      color="white"
-                      size="30px"
-                      font-scale="1"
-                    ></b-icon>
-                  </b-button>
-                </span>
+            <div class="card-middle">
+              <div class="row w-100" style="margin: 0 auto">
+                <div class="col-lg-10 col-sm-12">
+                  <span class="content">
+                    {{ quote.text_content }}
+                  </span>
+                </div>
+                <div class="col-lg-2 col-sm-12">
+                  <span class="button-group">
+                    <b-button
+                      v-b-tooltip.hover.bottom="'Просмотр'"
+                      class="bg-primary p-1 px-2 m-1"
+                      style="border-radius: 3px"
+                      @click="
+                        $router.push({
+                          name: 'QuotePage',
+                          params: { id: quote.id },
+                        })
+                      "
+                    >
+                      <b-icon
+                        icon="eye"
+                        color="white"
+                        size="30px"
+                        font-scale="1"
+                      ></b-icon>
+                    </b-button>
+                    <b-button
+                      v-b-tooltip.hover.bottom="'Редактировать'"
+                      class="bg-warning p-1 px-2 m-1"
+                      style="border-radius: 3px"
+                      @click="editQuotes(quote)"
+                    >
+                      <b-icon
+                        icon="pencil-square"
+                        color="white"
+                        size="30px"
+                        font-scale="1"
+                      ></b-icon>
+                    </b-button>
+                    <b-button
+                      v-b-tooltip.hover.bottom="'Удалить'"
+                      class="bg-danger p-1 px-2"
+                      style="border-radius: 3px"
+                      @click="openDeleteDialog(quote)"
+                    >
+                      <b-icon
+                        icon="basket"
+                        color="white"
+                        size="30px"
+                        font-scale="1"
+                      ></b-icon>
+                    </b-button>
+                  </span>
+                </div>
               </div>
             </div>
+            <div class="card-bottom">
+              <span
+                v-if="quote.created_date !== quote.update_date"
+                class="text-italic"
+                >изменено
+              </span>
+            </div>
           </div>
-          <div class="card-bottom">
-            <span
-              v-if="quote.created_date !== quote.update_date"
-              class="text-italic"
-              >изменено
-            </span>
-          </div>
-        </div>
-      </b-card>
+        </b-card>
+      </div>
+      <div
+        v-else
+        style="font-size: 25px"
+        class="w-100 mt-5 text-primary text-bold text-center"
+      >
+        Нет данных
+      </div>
     </div>
     <b-modal
       ref="form"
@@ -127,8 +167,6 @@
             v-model="bean.genre"
             @blur="$v.bean.genre.$touch()"
             :class="{ 'is-invalid': $v.bean.genre.$error }"
-            multiple
-            :options="genre_options_arr"
           >
           </b-form-input>
           <b-form-invalid-feedback v-if="!$v.bean.genre.required">
@@ -166,6 +204,12 @@
               variant="primary"
               class="bg-primary p-1 px-2 m-1"
               style="border-radius: 3px"
+              :disabled="
+                // eslint-disable-next-line
+                $v.bean.author.$invalid ||
+                $v.bean.genre.$invalid ||
+                $v.bean.text_content.$invalid
+              "
             >
               {{ bean.id ? "Редактировать" : "Создать" }}
             </b-button>
@@ -230,6 +274,18 @@ export default {
   },
   methods: {
     ...mapGetters(["getQuotesList"]),
+    filteredQuotes() {
+      let arr = this.getQuotesList();
+      if (this.filter.author) {
+        arr = arr.filter((el) => el.author.includes(this.filter.author));
+      }
+      if (this.filter.text_content) {
+        arr = arr.filter((el) =>
+          el.text_content.includes(this.filter.text_content)
+        );
+      }
+      this.quotes_list = arr;
+    },
     dateFormatter(milliseconds) {
       let day =
         new Date(milliseconds).getDate() > 10
@@ -262,16 +318,16 @@ export default {
     },
     quotesSave() {
       if (!this.bean.id) {
-        console.log(this.bean, " BEAN ");
         this.bean.id = this.quotes_list.length + 1;
         this.bean.created_date = new Date().getTime();
         this.bean.update_date = new Date().getTime();
         this.$store.commit("addQuote", this.bean);
-        // this.addQuote(this.bean);
       } else {
         this.bean.update_date = new Date().getTime();
         this.$store.commit("updateQuote", this.bean);
       }
+      if (this.filter.author || this.filter.text_content) this.filteredQuotes();
+      this.formDialog = false;
     },
   },
   mounted() {
@@ -320,8 +376,22 @@ export default {
   }
   .button-wrapper {
     display: flex;
-    justify-content: end;
+    justify-content: space-between;
     align-items: center;
+    .inputs-wrapper {
+      display: flex;
+    }
+    .input-filter {
+      max-width: 150px;
+      padding: 0 10px 0 0;
+      @media (max-width: 510px) {
+        padding: 0 5px 0 0;
+        max-width: 50%;
+      }
+    }
+    @media (max-width: 510px) {
+      flex-direction: column-reverse;
+    }
   }
 }
 .form-button-wrapper {
