@@ -11,6 +11,9 @@ export default new Vuex.Store({
     getQuotesList(state) {
       return state.quotes_list;
     },
+    getQuoteById: (state) => (id) => {
+      return state.quotes_list.find((quote) => quote.id === id);
+    },
   },
   mutations: {
     setQuotesList(state, val) {
